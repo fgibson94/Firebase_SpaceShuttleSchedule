@@ -9,7 +9,11 @@
     <!--Bootstrap!-->
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
         crossorigin="anonymous">
-
+    <link rel="stylesheet" href="style.css">
+    <script src="https://code.jquery.com/jquery.js"></script>
+    <script src="https://cdn.jsdelivr.net/momentjs/2.12.0/moment.min.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/4.12.1/firebase.js"></script>
+    <!-- <script src="script.js"></script> -->
 </head>
 
 <body>
@@ -17,83 +21,166 @@
     <div class="jumbotron jumbotron-fluid">
         <div class="container">
             <h1 class="display-4">Shuttle Bay</h1>
-            <p class="lead">A sentence descrbing the purpose and use of this page.</p>
+            <p class="lead">A sentence describing the purpose and use of this page.</p>
         </div>
     </div>
     <!-- Table for Schedule -->
     <div class="container">
         <div class="row">
-                    <table class="table" id="shuttleSchedule">
-            <thead>
-                <tr>
-                    <div class="panel-heading">
-                        <h3 class="panel-title">
-                            Incoming Shuttles
-                        </h6>
-                    </div>
-                </tr>
-                <tr>
-                    <th scope="col">
-                        Shuttle Name
-                    </th>
-                    <th scope="col">
-                        Departure
-                    </th>
-                    <th scope="col">
-                        Arrival
-                    </th>
-                    <th scope="col">
-                        Frequency 
-                    </th>
-                    <th scope="col">
-                        ETA
-                    </th>
-                </tr>
-            </thead>
-            <tbody id="shuttleInfo">
-                <td>
-                    Bajor
-                </td>
-                <td>
-                    304
-                </td>
-                <td>
-                    900
-                </td>
-                <td>
-                    Every 90
-                </td>
-                <td>
-                    Sooon
-                </td>
+            <div class="col-6">
+                <table class="table" id="shuttleSchedule">
+                    <thead>
+                        <tr>
+                            <div class="panel-heading">
+                                <h3 class="panel-title">
+                                    Incoming Shuttles
+                                </h3>
+                            </div>
+                        </tr>
+                        <tr>
+                            <th scope="col">
+                                Shuttle Name
+                            </th>
+                            <th scope="col">
+                                Destination
+                            </th>
+                            <th scope="col">
+                                Arrival Time
+                            </th>
+                            <th scope="col">
+                                Frequency
+                            </th>
+                            <th scope="col">
+                                Minutes till Arrival
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody id="shuttleInfo">
+                        <tr>
+                            <td>
+                                Bajor VI
+                            </td>
+                            <td>
+                                Space Station 9
+                            </td>
+                            <td>
+                                0900
+                            </td>
+                            <td>
+                                Every 90
+                            </td>
+                            <td>
+                                Sooon
+                            </td>
+                        </tr>
 
-            </tbody>
-        </table>
-    </div>
 
-        </div>
-    <div class="container">
-        <div class="row" id="shuttleForm">
-            <div class="col">
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-6">
                 <div class="panel-heading">
                     <h3 class="panel-title">Add Shuttle</h3>
                 </div>
                 <div class="panel-body">
-                    <form role="form">
-                        <label for=""></label>
-                        <input type="text">
+                    <form id="shuttleForm" role="form">
+                        <div class="form-group">
+                            <label for="name-input">Name</label>
+                            <input class="form-control" type="text" id="nameInput">
                         </div>
-
+                        <div class="form-group">
+                            <label for="name-input">Destinaton</label>
+                            <input class="form-control" type="text" id="shuttleDest">
+                        </div>
+                        <div class="form-group">
+                            <label for="name-input">Arrival Time</label>
+                            <input class="form-control" type="text" id="arriveTime">
+                        </div>
+                        <div class="form-group">
+                            <label for="name-input">Frequency</label>
+                            <input class="form-control" type="text" id="rateVal">
+                        </div>
+                        <button class="btn btn-default" id="addShuttle" type="submit">Submit</button>
                     </form>
                 </div>
             </div>
         </div>
+    </div>
 
-    </section>
-    <!-- Entry form for new shuttle -->
-
-
-    <!-- FIREBase -->
+    <br>
 </body>
 
 </html>
+<!-- Entry form for new shuttle -->
+
+<script>
+    // Initialize Firebase
+    var config = {
+        apiKey: "AIzaSyDhRwy9Lln3tMNPdjQ3rOFgZSZgtPgAOlM",
+        authDomain: "fir-spaceshuttle.firebaseapp.com",
+        databaseURL: "https://fir-spaceshuttle.firebaseio.com",
+        projectId: "fir-spaceshuttle",
+        storageBucket: "",
+        messagingSenderId: "1034001318270"
+    };
+    firebase.initializeApp(config);
+
+    var database = firebase.database();
+    var date = moment()
+    var name = ""
+    var destination = ""
+    var arriveTime = ""
+    var rate = ""
+    var nextShuttle = ""
+
+    //Add Shuttle on CLICK
+    $("#addShuttle").on("click", function (event) {
+        event.preventDefault();
+        name = $("#nameInput").val().trim();
+        destination = $("#shuttleDest").val().trim();
+        arriveTime = $("#arriveTime").val().trim();
+        arriveTime = moment(arriveTime).format("HH")
+        var minTillArrival = moment().toNow(arriveTime)
+        rate = $("#rateVal").val().trim()
+        rate = moment(rate).format()
+
+        database.ref().push({
+            Name: name,
+            Dest: destination,
+            Arrival: arriveTime,
+            Rate: rate,
+            ETA: minTillArrival
+        })
+
+        database.ref().on("child_added", function (snapshot) {
+            console.log(snapshot.val().Name);
+            console.log(snapshot.val().Dest)
+            console.log(snapshot.val().Arrival)
+            console.log(snapshot.val().Rate)
+            console.log(snapshot.val().ETA)
+
+            minTillArrival = snapshot.val().ETA
+            
+        })
+
+
+
+        $("#shuttleInfo").append(
+            `
+         <tr>
+             <td>${name}</td>
+             <td>${destination}</td>
+             <td>${arriveTime}</td>
+             <td>${rate}</td>
+             <td>${minTillArrival}</td>
+         `
+        )
+
+        $("#nameInput").val("");
+        $("#shuttleDest").val("");
+        $("#arriveTime").val("");
+        $("#rateVal").val("")
+    })
+
+
+</script>
