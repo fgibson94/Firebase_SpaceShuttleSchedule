@@ -126,32 +126,14 @@
     firebase.initializeApp(config);
 
     var database = firebase.database();
-    var date = moment()
-    var name = ""
-    var destination = ""
-    var arriveTime = ""
-    var rate = ""
-    var nextShuttle = ""
+    // var name = ""
+    // var destination = ""
+    // var arriveTime = moment().format("HH:hh")
+    // var rate = ""
+    // var nextShuttle = ""
 
     //Add Shuttle on CLICK
-    $("#addShuttle").on("click", function (event) {
-        event.preventDefault();
-        name = $("#nameInput").val().trim();
-        destination = $("#shuttleDest").val().trim();
-        arriveTime = $("#arriveTime").val().trim();
-        arriveTime = moment(arriveTime).format("HH")
-        var minTillArrival = moment().toNow(arriveTime)
-        rate = $("#rateVal").val().trim()
-        rate = moment(rate).format()
-
-        database.ref().push({
-            Name: name,
-            Dest: destination,
-            Arrival: arriveTime,
-            Rate: rate,
-            ETA: minTillArrival
-        })
-
+    $(document).ready(function() {
         database.ref().on("child_added", function (snapshot) {
             console.log(snapshot.val().Name);
             console.log(snapshot.val().Dest)
@@ -159,22 +141,36 @@
             console.log(snapshot.val().Rate)
             console.log(snapshot.val().ETA)
 
-            minTillArrival = snapshot.val().ETA
-            
-        })
-
-
-
-        $("#shuttleInfo").append(
+            var minTillArrival = moment(snapshot.val().Arrival, "HH:hh").toNow()
+            $("#shuttleInfo").append(
             `
          <tr>
-             <td>${name}</td>
-             <td>${destination}</td>
-             <td>${arriveTime}</td>
-             <td>${rate}</td>
+             <td>${snapshot.val().Name}</td>
+             <td>${snapshot.val().Dest}</td>
+             <td>${snapshot.val().Arrival}</td>
+             <td>${snapshot.val().Rate}</td>
              <td>${minTillArrival}</td>
          `
         )
+            
+        });
+    });
+    $("#addShuttle").on("click", function (event) {
+        event.preventDefault();
+        var name = $("#nameInput").val().trim();
+        var destination = $("#shuttleDest").val().trim();
+        var arriveTime = $("#arriveTime").val().trim();
+        arriveTime = moment(arriveTime).format("HH:hh")
+        var minTillArrival = moment(arriveTime).toNow()
+        var rate = $("#rateVal").val().trim()
+        rate = moment(rate).format()
+
+        database.ref().push({
+            Name: name,
+            Dest: destination,
+            Arrival: arriveTime,
+            Rate: rate,
+        })
 
         $("#nameInput").val("");
         $("#shuttleDest").val("");
